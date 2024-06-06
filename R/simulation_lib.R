@@ -39,7 +39,6 @@ DrawCorrelatedGroups <- function(n_obs, latent_mean, latent_cov) {
 #' @param degree The degree of interaction
 #'
 #' @return A list containing a number of dataframes.
-#' - effect_df: A dataframe containing s, name, and effect sizes.
 #' - beta_df: The coefficients used to generate the effects
 #' - regressor_df: The mapping between regressors (group interactions) and categories
 #' - group_df: The mapping between individual group membership and categories  
@@ -57,8 +56,8 @@ DrawGroupEffects <- function(n_groups, degree) {
     do.call(expand.grid, .) %>%
     mutate(s=1:n())
   names(group_df)  <- c(g_cols, "s")
-
-
+  
+  
   # Get a long dataframe with each regressor's value within
   # each category.  A single category contains multiple regressors.#
   g_sum <- paste0(g_cols, collapse=" + ")
@@ -69,7 +68,7 @@ DrawGroupEffects <- function(n_groups, degree) {
     inner_join(group_df, by=g_cols) %>%
     pivot_longer(cols=-s) %>%
     mutate(order=str_count(name, pattern=":") + 1)
-
+  
   # Construct a coefficient for each regressor.
   beta_df <-
     regressor_df %>%
@@ -78,20 +77,8 @@ DrawGroupEffects <- function(n_groups, degree) {
     mutate(beta=rnorm(n(), 0, sd=1.5)) %>%
     mutate(beta=beta / order) %>%
     mutate(beta=beta - mean(beta))
-
-  # Compute the effect size for each category.
-  # Join the coefficients with the category memberships,
-  # and add up all the effects that contribute to a category.
-  effect_df <- 
-    select(beta_df, name, beta) %>%
-    inner_join(regressor_df, by="name") %>%
-    mutate(gbeta=value * beta) %>%
-    group_by(s) %>%
-    summarize(logit_ey=sum(gbeta), .groups="drop") %>%
-    mutate(ey=Expit(logit_ey))
-
+  
   return(list(
-    effect_df=effect_df, 
     beta_df=beta_df, 
     regressor_df=regressor_df, 
     group_df=group_df, 
@@ -100,29 +87,52 @@ DrawGroupEffects <- function(n_groups, degree) {
 }
 
 
+#' Accumulate responses of group membership interactions
+#' @param group_effects A list of group effects, e.g. as returned by `DrawGroupEffects`
+#'
+#' @return A dataframe with regressors, groups, and ey values suitable for
+#' joining with raw data.
+AccumulateInteractionEffects <- function(group_effects) {
+  # Compute the effect size for each category.
+  # Join the coefficients with the category memberships,
+  # and add up all the effects that contribute to a category.
+  
+  effect_df <- 
+    select(group_effects$beta_df, name, beta) %>%
+    inner_join(group_effects$regressor_df, by="name") %>%
+    mutate(gbeta=value * beta) %>%
+    group_by(s) %>%
+    summarize(logit_ey=sum(gbeta), .groups="drop") %>%
+    mutate(ey=Expit(logit_ey)) %>%
+    inner_join(group_effects$group_df, by="s")
+  
+  attr(effect_df, "reg_form") <- group_effects$reg_form
+  return(effect_df)
+}
+
 
 
 #' Draw binary responses for a particular set of group memberships
 #' @param g_matrix A matrix of group memberships, e.g. as returned by `DrawCorrelatedGroups`
-#' @param group_effects A list of group effects, e.g. as returned by `DrawGroupEffects`
+#' @param effect_df A dataframe containing the columns in `g_matrix` as well as
+#' expected response `ey`, e.g. as returned by `AccumulateInteractionEffects`.
 #'
 #' @return A dataframe containing group memberships `s` and responses `y` corresponding
 #' to the rows of `g_matrix`.
 #'@export
-DrawResponse <- function(g_matrix, group_effects) {
+DrawResponse <- function(g_matrix, effect_df) {
   g_cols <- names(g_matrix)
-  stopifnot(all(group_effects$g_cols %in% colnames(g_matrix)))
+  stopifnot(all(g_cols %in% names(effect_df)))
+  reg_form <- attr(effect_df, "reg_form")
   response_df <- 
-    model.matrix(formula(group_effects$reg_form), data.frame(g_matrix)) %>%
+    model.matrix(formula(reg_form), data.frame(g_matrix)) %>%
     as.data.frame() %>%
     mutate(n=1:n()) %>%
-    inner_join(group_effects$group_df, by=group_effects$g_cols) %>%
-    inner_join(group_effects$effect_df, by="s") %>%
+    left_join(effect_df, by=g_cols) %>%
     mutate(y=1 * (runif(n()) <= ey)) %>%
     arrange(n)
   return(response_df)
 }
-
 
 
 
@@ -147,12 +157,14 @@ SimulateSurveyData <- function(n_groups, n_obs, n_obs_pop, degree) {
   g_pop <- DrawCorrelatedGroups(n_obs_pop, pop_mean, pop_cov)
 
   group_effects <- DrawGroupEffects(n_groups, degree)
+  effect_df <- AccumulateInteractionEffects(group_effects)
 
-  survey_df <- DrawResponse(g_survey, group_effects)
-  pop_df <- DrawResponse(g_pop, group_effects)
+  survey_df <- DrawResponse(g_survey, effect_df)
+  pop_df <- DrawResponse(g_pop, effect_df)
 
   return(list(
     group_effects=group_effects,
+    effect_df=effect_df,
     survey_df=survey_df,
     pop_df=pop_df
   ))

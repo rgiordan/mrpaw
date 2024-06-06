@@ -4,12 +4,13 @@
 \alias{DrawResponse}
 \title{Draw binary responses for a particular set of group memberships}
 \usage{
-DrawResponse(g_matrix, group_effects)
+DrawResponse(g_matrix, effect_df)
 }
 \arguments{
 \item{g_matrix}{A matrix of group memberships, e.g. as returned by \code{DrawCorrelatedGroups}}
 
-\item{group_effects}{A list of group effects, e.g. as returned by \code{DrawGroupEffects}}
+\item{effect_df}{A dataframe containing the columns in \code{g_matrix} as well as
+expected response \code{ey}, e.g. as returned by \code{AccumulateInteractionEffects}.}
 }
 \value{
 A dataframe containing group memberships \code{s} and responses \code{y} corresponding

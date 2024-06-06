@@ -14,7 +14,6 @@ DrawGroupEffects(n_groups, degree)
 \value{
 A list containing a number of dataframes.
 \itemize{
-\item effect_df: A dataframe containing s, name, and effect sizes.
 \item beta_df: The coefficients used to generate the effects
 \item regressor_df: The mapping between regressors (group interactions) and categories
 \item group_df: The mapping between individual group membership and categories
