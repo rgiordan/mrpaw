@@ -3,7 +3,11 @@ library(lme4)
 library(brms)
 library(tidybayes)
 library(mrpaw)
+library(gridExtra)
 
+AEqBLine <- function() {
+  geom_abline(aes(slope=1, intercept=0))
+}
 
 ##########################################
 # Simulate some categories
@@ -50,7 +54,8 @@ w_opt <-
 #####################################
 # Run logistic and OLS regression
 
-g_sum <- paste(group_effects$g_cols, collapse=" + ")
+
+g_sum <- paste(sim_data$group_effects$g_cols, collapse=" + ")
 reg_form <-sprintf( "y ~ 1 + (%s)^%d", g_sum, degree)
 
 logit_fit <- glm(formula(reg_form), survey_df, family=binomial(link="logit"))
@@ -58,7 +63,6 @@ lm_fit <- lm(formula(reg_form), survey_df)
 
 coefficients(lm_fit)
 coefficients(logit_fit)
-group_effects$beta_df
 
 mrp_ols_weights <- GetOLSWeights(lm_fit, survey_df, pop_df)
 mrp_logit_weights <- GetLogitWeights(logit_fit, survey_df, pop_df)
@@ -68,8 +72,10 @@ cat(paste(
   mrp_logit_weights$mrp, 
   mrp_true, collapse=", "), "\n")
 if (FALSE) {
-  plot(mrp_ols_weights$w, w_opt); abline(0,1)
-  plot(mrp_logit_weights$w, w_opt); abline(0,1)
+  grid.arrange(
+    qplot(mrp_ols_weights$w, w_opt) + AEqBLine(),
+    qplot(mrp_logit_weights$w, w_opt) + AEqBLine()
+  )
 }
 
 
@@ -119,7 +125,7 @@ logit_mcmc_mrp <- GetLogitMCMCWeights(
 cat(mean(logit_mcmc_mrp$mrp_draws), ", ", mrp_true, "\n")
 cat(mean(logit_mcmc_mrp$mrp_draws), ", ", mrp_ols_weights$mrp, "\n")
 if (FALSE) {
-  plot(logit_mcmc_mrp$w, w_opt); abline(0, 1)
+  qplot(logit_mcmc_mrp$w, w_opt) + AEqBLine()
 }
 
 
@@ -160,7 +166,7 @@ lin_mcmc_mrp <- GetOLSMCMCWeights(
 cat(mean(lin_mcmc_mrp$mrp_draws), ", ", mrp_true, "\n")
 cat(mean(lin_mcmc_mrp$mrp_draws), ", ", mrp_ols_weights$mrp, "\n")
 if (FALSE) {
-  plot(lin_mcmc_mrp$w, w_opt); abline(0, 1)
+  qplot(lin_mcmc_mrp$w, w_opt) + AEqBLine()
 }
 
 
