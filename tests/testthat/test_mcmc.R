@@ -17,11 +17,11 @@ context("mrpaw")
 ################################################################
 # Get the MrP posterior draws and weights for the normal model
 test_that("mcmc_runs", {
-  for (method in c("ols", "logit")) {
+  for (method in c("ols", "logit", "ols_response_name", "logit_response_name")) {
     print(sprintf("Testing MCMC for method %s", method))
-    if (method == "ols") {
+    if (method %in% c("ols", "ols_response_name")) {
       MrPawFunction <- GetOLSMCMCWeights
-    } else if (method == "logit") {
+    } else if (method %in% c("logit", "logit_response_name")) {
       MrPawFunction <- GetLogitMCMCWeights
     } else {
       expect_true(FALSE, sprintf("Unknown method %s", method))
@@ -46,6 +46,7 @@ test_that("mcmc_runs", {
     # Test the likelihood computation
     yhat_pop <- posterior_epred(post, newdata=agg_list$pop_agg_df)
     linpred_pop <- posterior_linpred(post, newdata=agg_list$pop_agg_df)
+
     if (method == "ols") {
       AssertNearlyEqual(linpred_pop, yhat_pop)
 

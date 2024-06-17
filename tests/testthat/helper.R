@@ -77,7 +77,7 @@ AssertNearlyZero <- function(x, tol=1e-15, desc=NULL) {
 # Load saved posterior samples (or run if needed)
 
 RunAndCachePosterior <- function(
-  sim_data, reg_form, post_filename, family, num_draws=100) {
+  sim_data, reg_form, post_filename, family, num_draws) {
     stan_time <- Sys.time()
     post <- brm(formula(reg_form), sim_data$survey_df, family=family,
                 chains=4, cores=4, seed=1543, 
@@ -91,34 +91,62 @@ RunAndCachePosterior <- function(
 }
 
 
+# Load a posterior for a particular test method, and run MCMC
+# if the file is not available.
 SafeLoadPosterior <- function(method) {
+  GetDefaultConfig <- function() {
+    config <- list()
+    sim_data <- GetTestData()
+    config$sim_data <- sim_data
+    group_effects <- sim_data$group_effects
+    g_cols <- group_effects$g_cols
+    g_sum <- paste(group_effects$g_cols, collapse=" + ")
+    config$reg_form <-sprintf( "y ~ 1 + (%s)^%d", g_sum, degree=2)
+    return(config)
+  }
+
   if (method == "ols") {
-    family <- gaussian()
-    post_filename <- test_path("mcmc_cache/ols_post_test.rds")
+    config <- GetDefaultConfig()
+    config$family <- gaussian()
+    config$post_filename <- test_path("mcmc_cache/ols_post_test.rds")
+    config$num_draws <- 5000
   } else if (method == "logit") {
-    family <- bernoulli(link="logit")
-    post_filename <- test_path("mcmc_cache/logit_post_test.rds")
+    config <- GetDefaultConfig()
+    config$family <- bernoulli(link="logit")
+    config$post_filename <- test_path("mcmc_cache/logit_post_test.rds")
+    config$num_draws <- 5000
+  } else if (method == "ols_response_name") {
+    config <- GetDefaultConfig()
+    config$family <- gaussian()
+    config$post_filename <- test_path("mcmc_cache/ols_post_response_name_test.rds")
+    config$num_draws <- 100
+    config$sim_data <- rename(config$sim_data, resp=y)
+    config$reg_form <-sprintf( "resp ~ 1 + (%s)^%d", g_sum, degree=2)
+  } else if (method == "logit_response_name") {
+    config <- GetDefaultConfig()
+    config$family <- gaussian()
+    config$post_filename <- test_path("mcmc_cache/ols_post_response_name_test.rds")
+    config$num_draws <- 100
+    config$sim_data <- rename(config$sim_data, resp=y)
+    config$reg_form <-sprintf( "resp ~ 1 + (%s)^%d", g_sum, degree=2)
   } else {
     expect_true(FALSE, sprintf("Unknown method %s", method))
   }
 
-  print(post_filename)
+  print(config$post_filename)
 
-  if (!file.exists(post_filename)) {
-    print(sprintf("Could not locate file %s", post_filename))
+  if (!file.exists(config$post_filename)) {
+    print(sprintf("Could not locate file %s", config$post_filename))
     print("Re-running MCMC and saving result to rds file")
-    sim_data <- GetTestData()
-    group_effects <- sim_data$group_effects
-    g_cols <- sim_data$group_effects$g_cols
-    g_sum <- paste(group_effects$g_cols, collapse=" + ")
-    reg_form <-sprintf( "y ~ 1 + (%s)^%d", g_sum, degree=2)
-    RunAndCachePosterior(sim_data, reg_form, post_filename, family=family, num_draws=100)
+    RunAndCachePosterior(
+      config$sim_data, config$reg_form, config$post_filename, 
+      family=config$family, num_draws=config$num_draws)
   } else {
-        print(sprintf("Found cached posterior samples in %s", post_filename))
+    print(sprintf("Found cached posterior samples in %s", config$post_filename))
   }
 
-  print(sprintf("Reading posterior from file %s", post_filename))
-  rds_load <- readRDS(post_filename)
+  print(sprintf("Reading posterior from file %s", config$post_filename))
+  rds_load <- readRDS(config$post_filename)
   return(rds_load)
 }
 
