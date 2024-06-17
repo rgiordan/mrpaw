@@ -8,6 +8,12 @@ for testing.}
 \usage{
 GetResponse(post)
 }
+\arguments{
+\item{post}{A brms posterior}
+}
+\value{
+The numeric response variable used for the posteriro fitting
+}
 \description{
 Get the response variable (y) from the posterior.
 I don't see this use clearly documented, so I want to factor it out

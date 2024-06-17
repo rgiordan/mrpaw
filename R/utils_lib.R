@@ -38,7 +38,11 @@ CheckOLSFamily <- function(lin_post) {
 #' Get the response variable (y) from the posterior.
 #' I don't see this use clearly documented, so I want to factor it out
 #' for testing.
+#' @param post A brms posterior
+#'
+#' @return The numeric response variable used for the posteriro fitting 
+#'@export
 GetResponse <- function(post) {
-    return(standata(post)$Y)
+    return(as.numeric(standata(post)$Y))
 }
 

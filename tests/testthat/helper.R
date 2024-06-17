@@ -120,15 +120,17 @@ SafeLoadPosterior <- function(method) {
     config$family <- gaussian()
     config$post_filename <- test_path("mcmc_cache/ols_post_response_name_test.rds")
     config$num_draws <- 100
-    config$sim_data <- rename(config$sim_data, resp=y)
-    config$reg_form <-sprintf( "resp ~ 1 + (%s)^%d", g_sum, degree=2)
+    config$sim_data$survey_df <- rename(config$sim_data$survey_df, resp=y)
+    config$sim_data$pop_df <- rename(config$sim_data$pop_df, resp=y)
+    config$reg_form <- sub("^y", "resp", config$reg_form)
   } else if (method == "logit_response_name") {
     config <- GetDefaultConfig()
     config$family <- gaussian()
     config$post_filename <- test_path("mcmc_cache/ols_post_response_name_test.rds")
     config$num_draws <- 100
-    config$sim_data <- rename(config$sim_data, resp=y)
-    config$reg_form <-sprintf( "resp ~ 1 + (%s)^%d", g_sum, degree=2)
+    config$sim_data$survey_df <- rename(config$sim_data$survey_df, resp=y)
+    config$sim_data$pop_df <- rename(config$sim_data$pop_df, resp=y)
+    config$reg_form <- sub("^y", "resp", config$reg_form)
   } else {
     expect_true(FALSE, sprintf("Unknown method %s", method))
   }
