@@ -11,10 +11,6 @@ devtools::load_all()
 post_filename <- test_path("mcmc_cache/logit_post_test.rds")
 file.exists(post_filename)
 
-#SafeLoadPosterior("ols")
-
-
-
 getwd()
 #testthat::test_file("tests/testthat/test_mcmc.R")
 #testthat::test_local("tests/testthat/test_mcmc.R")

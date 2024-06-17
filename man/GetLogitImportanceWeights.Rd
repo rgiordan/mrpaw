@@ -11,7 +11,7 @@ GetLogitImportanceWeights(logit_post, survey_df, y_new)
 
 \item{survey_df}{The survey dataframe}
 
-\item{y_new}{A vector of new responses, the same dimension as survey_df$y}
+\item{y_new}{A vector of new responses, the same length as the original response}
 }
 \description{
 Evaluate importance sampling MCMC weights for new y values.
