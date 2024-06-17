@@ -2,8 +2,9 @@ library(testthat)
 library(devtools)
 library(mrpaw)
 
-setwd("/home/rgiordan/Documents/git_repos/SurveyWeighting/mrpaw/mrpaw")
+#setwd("/home/rgiordan/Documents/git_repos/SurveyWeighting/mrpaw/mrpaw")
 #source("tests/testthat/helper.R")
+setwd("~/Documents/git_repos/mrpaw/")
 
 devtools::load_all()
 
@@ -18,30 +19,29 @@ testthat::test_file("tests/testthat/test_mcmc.R")
 
 
 
-method <- "ols"
+method <- "ols_response_name"
 
-
-print(sprintf("Testing MCMC for method %s", method))
-if (method == "ols") {
+if (method %in% c("ols", "ols_response_name")) {
   MrPawFunction <- GetOLSMCMCWeights
-} else if (method == "logit") {
+} else if (method %in% c("logit", "logit_response_name")) {
   MrPawFunction <- GetLogitMCMCWeights
 } else {
-  expect_true(FALSE, "This should never happen")
+  expect_true(FALSE, sprintf("Unknown method %s", method))
 }
 
 rds_load <- SafeLoadPosterior(method)
 post <- rds_load$post
 sim_data <- rds_load$sim_data
-agg_list <- AggregateSimulationData(sim_data)
+agg_list <- rds_load$agg_list
 
-# Sanity check that I'm computing the log likelihood correctly
-# (I'm not taking into account the prior so there will be some small mismatch)
-ols_ll_draws <- GetOLSLikelihoodComponentDraws(post, sim_data$survey_df)
+y_col <- f_lhs(as.formula(formula(post)))
+agg_list <- AggregateSimulationData(sim_data, y_col)
 
-sigma_draws <- ols_ll_draws$sigma_draws
-resid_draws <- ols_ll_draws$resid_draws
-lp_draws_check <- post %>% spread_draws(lp__) %>% pull(lp__)
-lp_mat <- -0.5 * (resid_draws^2) / (sigma_draws^2) - log(sigma_draws)
-lp_draws <- apply(lp_mat, FUN=sum, MARGIN=1)
-expect_true(cor(lp_draws, lp_draws_check) > 0.99)
+# Test that this runs and produces weights of the correct length.
+mcmc_mrp <- MrPawFunction(
+  post, 
+  sim_data$survey_df, 
+  agg_list$pop_agg_df, 
+  pop_w=agg_list$pop_agg_df$w)
+
+expect_true(length(mcmc_mrp$w) == nrow(sim_data$survey_df))

@@ -8,6 +8,7 @@ library(mrpaw)
 library(testthat)
 library(tidyverse)
 library(brms)
+library(rlang)
 
 context("mrpaw")
 
@@ -21,17 +22,21 @@ test_that("mcmc_runs", {
     print(sprintf("Testing MCMC for method %s", method))
     if (method %in% c("ols", "ols_response_name")) {
       MrPawFunction <- GetOLSMCMCWeights
+      model_type <- "ols"
     } else if (method %in% c("logit", "logit_response_name")) {
       MrPawFunction <- GetLogitMCMCWeights
+      model_type <- "logit"
     } else {
-      expect_true(FALSE, sprintf("Unknown method %s", method))
+      expect_true(FALSE, sprintf("mcmc_runs: Unknown method %s", method))
     }
 
     rds_load <- SafeLoadPosterior(method)
     post <- rds_load$post
     sim_data <- rds_load$sim_data
+    agg_list <- rds_load$agg_list
 
-    agg_list <- AggregateSimulationData(sim_data)
+    y_col <- f_lhs(as.formula(formula(post)))
+    agg_list <- AggregateSimulationData(sim_data, y_col)
 
     # Test that this runs and produces weights of the correct length.
     mcmc_mrp <- MrPawFunction(
@@ -47,7 +52,7 @@ test_that("mcmc_runs", {
     yhat_pop <- posterior_epred(post, newdata=agg_list$pop_agg_df)
     linpred_pop <- posterior_linpred(post, newdata=agg_list$pop_agg_df)
 
-    if (method == "ols") {
+    if (model_type == "ols") {
       AssertNearlyEqual(linpred_pop, yhat_pop)
 
       # Sanity check that I'm computing the log likelihood correctly
@@ -61,7 +66,7 @@ test_that("mcmc_runs", {
       lp_draws <- apply(lp_mat, FUN=sum, MARGIN=1)
       expect_true(cor(lp_draws, lp_draws_check) > 0.99)
 
-    } else if (method == "logit") {
+    } else if (model_type == "logit") {
       # posterior_epred should be yhat.
       # posterior_linpred should be theta^T x_n.  
       # Draws are in rows and observations in columns.
@@ -70,7 +75,7 @@ test_that("mcmc_runs", {
       # Sanity check that I'm computing the log likelihood correctly
       # (I'm not taking into account the prior so there will be some small mismatch)
       eta_draws <- posterior_linpred(post, newdata=sim_data$survey_df)
-      y <- sim_data$survey_df$y
+      y <- GetResponse(post)
       lp_mat <- (y * t(eta_draws) - log(1 + exp(t(eta_draws)))) %>% t()
       lp_draws <- apply(lp_mat, FUN=sum, MARGIN=1)
       lp_draws_check <- post %>% spread_draws(lp__) %>% pull(lp__)
@@ -78,7 +83,7 @@ test_that("mcmc_runs", {
 
 
     } else {
-      expect_true(FALSE, sprintf("Unknown method %s", method))
+      expect_true(FALSE, sprintf("mcmc_runs: Unknown model type %s", model_type))
     }
   }
 

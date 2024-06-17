@@ -14,7 +14,7 @@ GetTestData <- function() {
 }
 
 
-AggregateSimulationData <- function(sim_data) {
+AggregateSimulationData <- function(sim_data, resp="y") {
 
   ##########################################################
   # Aggregate across groups to check 
@@ -25,13 +25,13 @@ AggregateSimulationData <- function(sim_data) {
   survey_agg_df <-
     sim_data$survey_df %>%
     group_by(pick(all_of(c(g_cols, "s")))) %>%
-    summarize(count=n(), ybar=mean(y), ey=mean(ey), .groups="drop") %>%
+    summarize(count=n(), ybar=mean(.data[[resp]]), ey=mean(ey), .groups="drop") %>%
     mutate(w=count / sum(count))
 
   pop_agg_df <-
     sim_data$pop_df %>%
     group_by(pick(all_of(c(g_cols, "s")))) %>%
-    summarize(count=n(), ybar=mean(y), ey=mean(ey), .groups="drop") %>%
+    summarize(count=n(), ybar=mean(.data[[resp]]), ey=mean(ey), .groups="drop") %>%
     mutate(w=count / sum(count))
 
   # Compare the averages and weights directly from the population
@@ -125,14 +125,14 @@ SafeLoadPosterior <- function(method) {
     config$reg_form <- sub("^y", "resp", config$reg_form)
   } else if (method == "logit_response_name") {
     config <- GetDefaultConfig()
-    config$family <- gaussian()
-    config$post_filename <- test_path("mcmc_cache/ols_post_response_name_test.rds")
+    config$family <- bernoulli(link="logit")
+    config$post_filename <- test_path("mcmc_cache/logit_post_response_name_test.rds")
     config$num_draws <- 100
     config$sim_data$survey_df <- rename(config$sim_data$survey_df, resp=y)
     config$sim_data$pop_df <- rename(config$sim_data$pop_df, resp=y)
     config$reg_form <- sub("^y", "resp", config$reg_form)
   } else {
-    expect_true(FALSE, sprintf("Unknown method %s", method))
+    expect_true(FALSE, sprintf("SafeLoadPosterior: Unknown method %s", method))
   }
 
   print(config$post_filename)

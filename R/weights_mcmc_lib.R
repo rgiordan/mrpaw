@@ -60,7 +60,7 @@ GetOLSLikelihoodComponentDraws <- function(lin_post, survey_df) {
     yhat_draws <- posterior_linpred(lin_post, newdata=survey_df)
     stopifnot(ncol(yhat_draws) == nrow(survey_df))
     y <- GetResponse(lin_post)
-    resid_draws <- (survey_df$y - t(yhat_draws)) %>% t()
+    resid_draws <- (y - t(yhat_draws)) %>% t()
     return(list(resid_draws=resid_draws, sigma_draws=sigma_draws, yhat_draws=yhat_draws))
 }
 
