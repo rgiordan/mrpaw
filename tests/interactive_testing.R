@@ -15,33 +15,39 @@ file.exists(post_filename)
 getwd()
 #testthat::test_file("tests/testthat/test_mcmc.R")
 #testthat::test_local("tests/testthat/test_mcmc.R")
-testthat::test_file("tests/testthat/test_mcmc.R")
+testthat::test_file("tests/testthat/test_utils.R")
 
 
-
-method <- "ols_response_name"
-
-if (method %in% c("ols", "ols_response_name")) {
-  MrPawFunction <- GetOLSMCMCWeights
-} else if (method %in% c("logit", "logit_response_name")) {
-  MrPawFunction <- GetLogitMCMCWeights
-} else {
-  expect_true(FALSE, sprintf("Unknown method %s", method))
+set.seed(1423098)
+DrawSamples <- function(n_draws) {
+  draws1_mat <- rnorm(2 * n_draws) %>% matrix(ncol=2)
+  draws2_mat <- draws1_mat + rnorm(2 * n_draws) %>% matrix(ncol=2)
+  return(list(d1=draws1_mat, d2=draws2_mat))  
 }
 
-rds_load <- SafeLoadPosterior(method)
-post <- rds_load$post
-sim_data <- rds_load$sim_data
-agg_list <- rds_load$agg_list
+n_draws <- 50300
 
-y_col <- f_lhs(as.formula(formula(post)))
-agg_list <- AggregateSimulationData(sim_data, y_col)
+n_sims <- 1000
+cov_draws <- array(NA, c(n_sims, 2, 2))
+for (sim in 1:n_sims) {
+  draws <- DrawSamples(n_draws)
+  cov_draws[sim,,] <- cov(draws$d1, draws$d2)
+}
+true_se <- apply(cov_draws, sd, MARGIN=c(2,3))
 
-# Test that this runs and produces weights of the correct length.
-mcmc_mrp <- MrPawFunction(
-  post, 
-  sim_data$survey_df, 
-  agg_list$pop_agg_df, 
-  pop_w=agg_list$pop_agg_df$w)
+draws <- DrawSamples(n_draws)
+cov(draws$d1, draws$d2) # Should be roughly the identity
 
-expect_true(length(mcmc_mrp$w) == nrow(sim_data$survey_df))
+num_blocks <- 500
+num_draws <- 600
+draws1_mat <- draws$d1
+draws2_mat <- draws$d2
+cov_fun <- cov
+show_progress_bar <- TRUE
+cov_se_list <- GetBlockBootstrapCovarianceDraws(
+  draws1_mat, draws2_mat, num_blocks, num_draws, show_progress_bar=TRUE
+)
+
+prop_err <- (cov_se_list$cov_se - true_se) / true_se
+
+AssertNearlyEqual(prop_err, 0, tol=0.08)

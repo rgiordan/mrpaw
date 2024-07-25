@@ -157,7 +157,7 @@ EvalInfluenceFunction <- function(mrpaw_list, post, survey_df) {
     n_obs <- length(y)
     ij_var <- n_obs * var(infl_vec)
 
-    return(list(infl_vec=infl_vec, ij_var=ij_var, lp_draws=lp_draws))
+    return(list(infl_vec=infl_vec, ij_var=ij_var, lp_mat=lp_mat))
 }
 
 
