@@ -133,6 +133,6 @@ for (x in cat_regressors) {
 
 # measure of ESS
 weights_df %>% 
-  summarize(effective_sample_size = sum(w)^2 / sum(w^2),
+  summarize(effective_sample_size = sum(abs(w))^2 / sum(w^2),
             sample_size = n())
 
