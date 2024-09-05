@@ -12,12 +12,16 @@ library(brms)
 #' @param pop_df The population dataframe
 #' @param pop_w Optional.  The weight given to each row of pop_df.  Defaults to ones.
 #' @param save_preds Optional.  If true, save the posterior predictions for re-use.
+#' @param re_formula Optional.  Formula containing group-level effects to be considered in the prediction. If `NULL` (default), include all group-level effects; if `NA`, include no group-level effects.
+#' @param allow_new_levels Optional.  If true, allow new levels of group-level effects in prediction stage.
 #'
 #' @return Draws from the MrP estimate, and the weight vector
 #' whose n-th entry is d E[MrP | X, Y] / d y_n.
 #'
 #'@export
-GetLogitMCMCWeights <- function(logit_post, survey_df, pop_df, pop_w=NULL, save_preds=FALSE) {
+GetLogitMCMCWeights <- function(logit_post, survey_df, pop_df, pop_w=NULL, 
+                                save_preds=FALSE, re_formula=NULL,
+                                allow_new_levels=FALSE) {
     stopifnot(class(logit_post) == "brmsfit")
 
     CheckLogitFamily(logit_post)
@@ -27,7 +31,9 @@ GetLogitMCMCWeights <- function(logit_post, survey_df, pop_df, pop_w=NULL, save_
     # posterior_epred should be yhat.
     # posterior_linpred should be theta^T x_n.  
     # Draws are in rows and observations in columns.
-    yhat_pop <- posterior_epred(logit_post, newdata=pop_df)
+    yhat_pop <- posterior_epred(logit_post, newdata=pop_df, 
+                                re_formula=re_formula,
+                                allow_new_levels=allow_new_levels)
     mrp_draws_logit <- yhat_pop %*% pop_w
 
     # Get the influence scores for the logit model
@@ -76,12 +82,15 @@ GetOLSLikelihoodComponentDraws <- function(lin_post, survey_df) {
 #' @param survey_df The survey dataframe
 #' @param pop_df The population dataframe
 #' @param pop_w Optional.  The weight given to each row of pop_df.  Defaults to ones.
+#' @param re_formula Optional.  Formula containing group-level effects to be considered in the prediction. If `NULL` (default), include all group-level effects; if `NA`, include no group-level effects.
+#' @param allow_new_levels Optional.  If true, allow new levels of group-level effects in prediction stage.
 #'
 #' @return Draws from the MrP estimate, and the weight vector
 #' whose n-th entry is d E[MrP | X, Y] / d y_n.
 #'
 #'@export
-GetOLSMCMCWeights <- function(lin_post, survey_df, pop_df, pop_w=NULL) {
+GetOLSMCMCWeights <- function(lin_post, survey_df, pop_df, pop_w=NULL, 
+                              re_formula=NULL, allow_new_levels=FALSE) {
     stopifnot(class(lin_post) == "brmsfit")
     CheckOLSFamily(lin_post)
 
@@ -93,7 +102,8 @@ GetOLSMCMCWeights <- function(lin_post, survey_df, pop_df, pop_w=NULL) {
     # print("Warning: the response variable must be y for this function to work!")
 
     pop_w <- GetPopulationWeights(pop_df, pop_w)
-    yhat_pop <- posterior_epred(lin_post, newdata=pop_df)
+    yhat_pop <- posterior_epred(lin_post, newdata=pop_df, re_formula=re_formula,
+                                allow_new_levels=allow_new_levels)
 
     mrp_draws_lin <- yhat_pop %*% pop_w
     ols_ll_draws <- GetOLSLikelihoodComponentDraws(lin_post, survey_df)
