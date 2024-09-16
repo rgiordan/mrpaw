@@ -9,7 +9,9 @@ GetLogitMCMCWeights(
   survey_df,
   pop_df,
   pop_w = NULL,
-  save_preds = FALSE
+  save_preds = FALSE,
+  re_formula = NULL,
+  allow_new_levels = FALSE
 )
 }
 \arguments{
@@ -22,6 +24,10 @@ GetLogitMCMCWeights(
 \item{pop_w}{Optional.  The weight given to each row of pop_df.  Defaults to ones.}
 
 \item{save_preds}{Optional.  If true, save the posterior predictions for re-use.}
+
+\item{re_formula}{Optional.  Formula containing group-level effects to be considered in the prediction. If \code{NULL} (default), include all group-level effects; if \code{NA}, include no group-level effects.}
+
+\item{allow_new_levels}{Optional.  If true, allow new levels of group-level effects in prediction stage.}
 }
 \value{
 Draws from the MrP estimate, and the weight vector

@@ -4,7 +4,14 @@
 \alias{GetOLSMCMCWeights}
 \title{Get MrPaw weights for the logistic MCMC estimator.}
 \usage{
-GetOLSMCMCWeights(lin_post, survey_df, pop_df, pop_w = NULL)
+GetOLSMCMCWeights(
+  lin_post,
+  survey_df,
+  pop_df,
+  pop_w = NULL,
+  re_formula = NULL,
+  allow_new_levels = FALSE
+)
 }
 \arguments{
 \item{lin_post}{The output of \code{brm(..., survey_df, family=gaussian())}}
@@ -14,6 +21,10 @@ GetOLSMCMCWeights(lin_post, survey_df, pop_df, pop_w = NULL)
 \item{pop_df}{The population dataframe}
 
 \item{pop_w}{Optional.  The weight given to each row of pop_df.  Defaults to ones.}
+
+\item{re_formula}{Optional.  Formula containing group-level effects to be considered in the prediction. If \code{NULL} (default), include all group-level effects; if \code{NA}, include no group-level effects.}
+
+\item{allow_new_levels}{Optional.  If true, allow new levels of group-level effects in prediction stage.}
 }
 \value{
 Draws from the MrP estimate, and the weight vector

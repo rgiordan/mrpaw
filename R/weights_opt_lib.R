@@ -3,6 +3,21 @@ library(tidyverse)
 
 
 
+CheckColumnNames <- function(x_ols, x_pop) {
+    # Right now we assume that the model matrices are the same.
+    # If they aren't we throw an error.
+    if (!all(colnames(x_ols) == colnames(x_pop))) {
+        print("Warning: the column names do not match.")
+        print("Columns in the population but not sample: ")
+        print(setdiff(colnames(x_pop), colnames(x_ols)))
+        print("Columns in the sample but not population: ")
+        print(setdiff(colnames(x_ols), colnames(x_pop)))
+        print("It is also possible that the columns are ordered differently.")
+        stop()
+    }
+}
+
+
 #' Get MrPaw weights for the OLS estimator.
 #' @param lm_fit The output of `lm`
 #' @param survey_df The survey dataframe
@@ -15,11 +30,14 @@ library(tidyverse)
 GetOLSWeights <- function(lm_fit, survey_df, pop_df, pop_w=NULL) {
     stopifnot(class(lm_fit) == "lm")
     pop_w <- GetPopulationWeights(pop_df, pop_w)
-    reg_form <- formula(lm_fit)
-    x_ols <- model.matrix(reg_form, survey_df)
 
-    # The formula may expect a response called y, so add it in.
-    x_pop <- model.matrix(reg_form, pop_df %>% mutate(y=0))
+    # Strip the response from the formula since it might be missing
+    # in the population dataframe.
+    reg_form <- update(formula(lm_fit), NULL ~ .)
+    x_ols <- model.matrix(reg_form, survey_df)
+    x_pop <- model.matrix(reg_form, pop_df)
+
+    CheckColumnNames(x_ols, x_pop)
 
     # The OLS model weights have a closed form.  (The logistic ones do
     # too, but I'll just put this in for now)
@@ -51,18 +69,19 @@ GetLogitWeights <- function(logit_fit, survey_df, pop_df, pop_w=NULL) {
     CheckLogitFamily(logit_fit)
     pop_w <- GetPopulationWeights(pop_df, pop_w)
 
-    reg_form <- formula(logit_fit)
+    # Strip the response from the formula since it might be missing
+    # in the population dataframe.
+    reg_form <- update(formula(logit_fit), NULL ~ .)
 
     phat <- predict(logit_fit, survey_df, type="response")
     phat_pop <- predict(logit_fit, pop_df, type="response")
     vhat <- phat * (1 - phat)
     vhat_pop <- phat_pop * (1 - phat_pop)
 
-    reg_form <- formula(logit_fit)
     x_ols <- model.matrix(reg_form, survey_df)
+    x_pop <- model.matrix(reg_form, pop_df)
 
-    # The formula may expect a response called y, so add it in.
-    x_pop <- model.matrix(reg_form, pop_df %>% mutate(y=0))
+    CheckColumnNames(x_ols, x_pop)
 
     # Mrp = w^T expit(x_pop beta)
     # d Mrp / d betahat = w^^T (v . x_pop) 
