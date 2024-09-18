@@ -78,3 +78,15 @@ test_that("simulations_correct", {
 
 })
 
+
+
+
+
+test_that("covariate_balance", {
+  # TODO!
+})
+
+
+test_that("influence_weighting", {
+  # TODO!
+})

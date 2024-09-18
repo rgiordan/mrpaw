@@ -1,7 +1,7 @@
 library(tidyverse)
 
 
-# Use pop_w for weights if specfieid, otherwise use 
+# Use pop_w for weights if specfied, otherwise use 
 # a vector of ones as long as pop_df.
 GetPopulationWeights <- function(pop_df, pop_w=NULL) {
     if (is.null(pop_w)) {

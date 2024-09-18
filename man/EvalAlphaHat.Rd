@@ -2,7 +2,7 @@
 % Please edit documentation in R/diagnostics_lib.R
 \name{EvalAlphaHat}
 \alias{EvalAlphaHat}
-\title{Estimate the coefficient were extra regressors to be included.}
+\title{Estimate the coefficient were extra regressors to be included.  (Experimental)}
 \usage{
 EvalAlphaHat(x0, mrpaw_list, post, survey_df)
 }
@@ -18,5 +18,5 @@ The estimated change (implicitly from zero) in the estimated
 coefficients using a single Newton step at each draw.
 }
 \description{
-Estimate the coefficient were extra regressors to be included.
+Estimate the coefficient were extra regressors to be included.  (Experimental)
 }

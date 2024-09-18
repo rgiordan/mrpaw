@@ -214,7 +214,7 @@ EvalFisherConsistency <- function(mrpaw_list, post, survey_df) {
 
 
 
-#' Estimate the coefficient were extra regressors to be included.
+#' Estimate the coefficient were extra regressors to be included.  (Experimental)
 #' @param x0 A matrix whose coefficients are assumed to be zero in the original fit
 #' @param mrpaw_list The output of one of the Get*MCMCWeights functions
 #' @param survey_df The survey dataframe
@@ -251,4 +251,56 @@ EvalAlphaHat <- function(x0, mrpaw_list, post, survey_df) {
     alpha_hat <- colMeans(alpha_hat_draws)
     names(alpha_hat) <- colnames(x0)
     return(list(alpha_hat=alpha_hat, ll_grad_draws=ll_grad_draws, ll_hess_draws=ll_hess_draws))
+}
+
+
+
+#' Use MrPaw to check covariate balance.
+#' 
+#' @param mrpaw_list The output of one of the Get*MCMCWeights functions
+#' @param x_sur A matrix of some regressors in the survey data
+#' @param x_pop A matrix of the same regressors in the population data
+#' @param pop_w (Optional) A vector of population weights. Taken to be all one if NULL.
+#'
+#' @return The weighted average regressors in each regressor matrix, where the
+#' weights in the survey are given by the MrP affine weights.
+#' The regressor matrices might be made with a call to model.matrix using the
+#' same formula for each dataset.
+#' 
+#' @export
+CheckCovariateBalance <- function(mrpaw_list, x_sur, x_pop, pop_w=NULL) {
+  pop_w <- GetPopulationWeights(x_pop, pop_w)
+  stopifnot(ncol(x_pop) == ncol(x_sur))
+  stopifnot(nrow(x_sur) == length(mrpaw_list$w))
+  if (any(colnames(x_pop) != colnames(x_sur))) {
+    warning_text <- paste0(
+      "The column names of the covariates do not match: ",
+      paste0("(", colnames(x_pop), ")", collapse=", "),
+      " versus ",
+      paste0("(", colnames(x_sur), ")", collapse=", ")
+    )
+    warn(warning_text)
+  }
+  return(list(
+    x_mean_pop=colSums(pop_w * x_pop),
+    x_mean_sur=colSums(mrpaw_list$w * x_sur)
+  ))
+}
+
+
+
+
+#' Use MrPaw to check invariance to weighting datapoints by covariate
+#' (i.e. distribution shift aligned with a covariate).
+#' 
+#' @param infl_list The output of the EvalInfluenceFunction function
+#' @param x_sur A matrix of some regressors in the survey data
+#'
+#' @return The derivative of MrP in the direction of a distribution
+#' shift aligned with each regressor in x_sur.
+#' 
+#' @export
+CheckDatapointWeighting <- function(infl_list, x_sur) {
+    stopifnot(nrow(x_sur) == length(infl_list$infl_vec))
+    return(colSums(x_sur * infl_list$infl_vec))
 }
