@@ -20,8 +20,12 @@ GetPopulationWeights <- function(pop_df, pop_w=NULL) {
 
 CheckLogitFamily <- function(logit_fit) {
     logit_family <- family(logit_fit)
-    stopifnot(logit_family$family %in% c("binomial", "bernoulli"))
-    stopifnot(logit_family$link == "logit")
+    if (!(logit_family$family %in% c("binomial", "bernoulli"))) {
+      warning(sprintf("Family is not binomial or bernoulli (%s)", post_family$family))
+    }
+    if (logit_family$link != "logit") {
+      warning(sprintf("Link is not logit (%s)", post_family$link))
+    }
 }
 
 
@@ -30,8 +34,12 @@ CheckLogitFamily <- function(logit_fit) {
 
 CheckOLSFamily <- function(lin_post) {
     post_family <- family(lin_post)
-    stopifnot(post_family$family == "gaussian")
-    stopifnot(post_family$link == "identity")
+    if (post_family$family != "gaussian") {
+      warning(sprintf("Family is not gaussian (%s)", post_family$family))
+    }
+    if (post_family$link != "identity") {
+      warning(sprintf("Link is not identity (%s)", post_family$link))
+    }
 }
 
 

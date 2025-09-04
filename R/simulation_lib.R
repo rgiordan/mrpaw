@@ -56,19 +56,24 @@ DrawGroupEffects <- function(n_groups, degree) {
     do.call(expand.grid, .) %>%
     mutate(s=1:n())
   names(group_df)  <- c(g_cols, "s")
-  
-  
+
+
   # Get a long dataframe with each regressor's value within
   # each category.  A single category contains multiple regressors.#
   g_sum <- paste0(g_cols, collapse=" + ")
-  reg_form <- sprintf("~ (%s)^%d - 1", g_sum, degree)
+  if (degree > 1) {
+    reg_form <- sprintf("~ (%s)^%d - 1", g_sum, degree)
+  } else {
+    # Raising to degree one is not allowed in model.matrix
+    reg_form <- sprintf("~ %s - 1", g_sum)
+  }
   regressor_df <- 
     model.matrix(formula(reg_form), group_df) %>%
     as.data.frame() %>%
     inner_join(group_df, by=g_cols) %>%
     pivot_longer(cols=-s) %>%
     mutate(order=str_count(name, pattern=":") + 1)
-  
+
   # Construct a coefficient for each regressor.
   beta_df <-
     regressor_df %>%

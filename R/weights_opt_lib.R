@@ -83,11 +83,11 @@ GetLogitWeights <- function(logit_fit, survey_df, pop_df, pop_w=NULL) {
 
     CheckColumnNames(x_ols, x_pop)
 
-    # Mrp = w^T expit(x_pop beta)
-    # d Mrp / d betahat = w^^T (v . x_pop) 
+    # Mrp = pi^T expit(x_pop beta)
+    # d Mrp / d betahat = pi^T (v_pop . x_pop)
     # hess = v_survey . x_ols
-    # dbetahat_dw <- solve(hess, t(x_ols)) =>
-    # d Mrp / d w = w^^T (v . x_pop) hess^{-1} x_survey
+    # dbetahat_dy <- solve(hess, t(x_ols)) =>
+    # d Mrp / d y = w^T (v_pop . x_pop) hess^{-1} x_survey
     hess <- t(x_ols * vhat) %*% x_ols
     mrp_chain_rule_term <- colSums(pop_w * vhat_pop * x_pop)
     w_logit <- t(mrp_chain_rule_term) %*% solve(hess, t(x_ols)) %>% as.numeric()
