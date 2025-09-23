@@ -49,8 +49,8 @@ test_that("mcmc_runs", {
 
     print("Testing likelihood")
     # Test the likelihood computation
-    yhat_pop <- posterior_epred(post, newdata=agg_list$pop_agg_df)
-    linpred_pop <- posterior_linpred(post, newdata=agg_list$pop_agg_df)
+    yhat_pop <- brms::posterior_epred(post, newdata=agg_list$pop_agg_df)
+    linpred_pop <- brms::posterior_linpred(post, newdata=agg_list$pop_agg_df)
 
     if (model_type == "ols") {
       AssertNearlyEqual(linpred_pop, yhat_pop)

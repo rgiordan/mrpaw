@@ -7,7 +7,8 @@ library(brms)
 library(tidybayes)
 
 
-
+#' @importFrom brms posterior_epred
+#' @importFrom brms posterior_linpred
 SafeGetYhatDraws <- function(mrpaw_list, post, survey_df) {
     if ("yhat_draws" %in% names(mrpaw_list)) {
         yhat_draws <- mrpaw_list$yhat_draws
@@ -18,6 +19,8 @@ SafeGetYhatDraws <- function(mrpaw_list, post, survey_df) {
 }
 
 
+#' @importFrom brms posterior_epred
+#' @importFrom brms posterior_linpred
 SafeGetEtaDraws <- function(mrpaw_list, post, survey_df) {
     if ("eta_draws" %in% names(mrpaw_list)) {
         eta_draws <- mrpaw_list$eta_draws
@@ -33,6 +36,8 @@ SafeGetEtaDraws <- function(mrpaw_list, post, survey_df) {
 #' @param survey_df The survey dataframe
 #' @param y_new A vector of new responses, the same length as the original response
 #'
+#' @importFrom brms posterior_epred
+#' @importFrom brms posterior_linpred
 #' @export
 GetLogitImportanceWeights <- function(logit_post, survey_df, y_new) {
   stopifnot(class(logit_post) == "brmsfit")
@@ -100,6 +105,8 @@ EvalOffset <- function(mrpaw_list, y) {
 #' @param post The output of `brm(..., survey_df, family=binomial(link="logit"))`
 #' @param survey_df The survey dataframe
 #'
+#' @importFrom brms posterior_epred
+#' @importFrom brms posterior_linpred
 #' @export
 EvalSelfInfluence <- function(post, survey_df) {
     yhat_draws <- posterior_epred(post, newdata=survey_df)

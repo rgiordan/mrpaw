@@ -18,6 +18,8 @@ library(brms)
 #' @return Draws from the MrP estimate, and the weight vector
 #' whose n-th entry is d E[MrP | X, Y] / d y_n.
 #'
+#' @importFrom brms posterior_epred
+#' @importFrom brms posterior_linpred
 #'@export
 GetLogitMCMCWeights <- function(logit_post, survey_df, pop_df, pop_w=NULL, 
                                 save_preds=FALSE, re_formula=NULL,
@@ -31,7 +33,7 @@ GetLogitMCMCWeights <- function(logit_post, survey_df, pop_df, pop_w=NULL,
     # posterior_epred should be yhat.
     # posterior_linpred should be theta^T x_n.  
     # Draws are in rows and observations in columns.
-    yhat_pop <- posterior_epred(logit_post, newdata=pop_df, 
+    yhat_pop <- posterior_epred(logit_post, newdata=pop_df,
                                 re_formula=re_formula,
                                 allow_new_levels=allow_new_levels)
     mrp_draws_logit <- yhat_pop %*% pop_w
@@ -88,6 +90,8 @@ GetOLSLikelihoodComponentDraws <- function(lin_post, survey_df) {
 #' @return Draws from the MrP estimate, and the weight vector
 #' whose n-th entry is d E[MrP | X, Y] / d y_n.
 #'
+#' @importFrom brms posterior_epred
+#' @importFrom brms posterior_linpred
 #'@export
 GetOLSMCMCWeights <- function(lin_post, survey_df, pop_df, pop_w=NULL, 
                               re_formula=NULL, allow_new_levels=FALSE) {

@@ -12,7 +12,7 @@ GetResponse(post)
 \item{post}{A brms posterior}
 }
 \value{
-The numeric response variable used for the posteriro fitting
+The numeric response variable used for the posterior fitting
 }
 \description{
 Get the response variable (y) from the posterior.
