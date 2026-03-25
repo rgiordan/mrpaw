@@ -6,5 +6,5 @@
 
 To install, if you must, you can run:
 ```{r}
-library(devtools); install_github("https://github.com/rgiordan/mrpaw", upgrade="never", force=TRUE)
+library(devtools); install_github("https://github.com/rgiordan/mrplew", upgrade="never", force=TRUE)
 ```

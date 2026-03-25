@@ -6,7 +6,7 @@ library(brms)
 # MCMC
 
 
-#' Get MrPaw weights for the logistic MCMC estimator.
+#' Get mrplew weights for the logistic MCMC estimator.
 #' @param logit_post The output of `brm(..., survey_df, family=binomial(link="logit"))`
 #' @param survey_df The survey dataframe
 #' @param pop_df The population dataframe
@@ -79,7 +79,7 @@ GetOLSLikelihoodComponentDraws <- function(lin_post, survey_df) {
 
 
 
-#' Get MrPaw weights for the logistic MCMC estimator.
+#' Get mrplew weights for the logistic MCMC estimator.
 #' @param lin_post The output of `brm(..., survey_df, family=gaussian())`
 #' @param survey_df The survey dataframe
 #' @param pop_df The population dataframe

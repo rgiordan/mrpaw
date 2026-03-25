@@ -2,7 +2,7 @@
 % Please edit documentation in R/diagnostics_lib.R
 \name{CheckDatapointWeighting}
 \alias{CheckDatapointWeighting}
-\title{Use MrPaw to check invariance to weighting datapoints by covariate
+\title{Use mrplew to check invariance to weighting datapoints by covariate
 (i.e. distribution shift aligned with a covariate).}
 \usage{
 CheckDatapointWeighting(infl_list, x_sur)
@@ -17,6 +17,6 @@ The derivative of MrP in the direction of a distribution
 shift aligned with each regressor in x_sur.
 }
 \description{
-Use MrPaw to check invariance to weighting datapoints by covariate
+Use mrplew to check invariance to weighting datapoints by covariate
 (i.e. distribution shift aligned with a covariate).
 }
