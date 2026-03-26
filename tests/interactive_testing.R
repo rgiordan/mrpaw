@@ -1,10 +1,10 @@
 library(testthat)
 library(devtools)
-library(mrpaw)
+library(mrplew)
 
-#setwd("/home/rgiordan/Documents/git_repos/SurveyWeighting/mrpaw/mrpaw")
+#setwd("/home/rgiordan/Documents/git_repos/SurveyWeighting/mrplew/mrplew")
 #source("tests/testthat/helper.R")
-setwd("~/Documents/git_repos/mrpaw/")
+setwd("~/Documents/git_repos/mrplew/")
 
 devtools::load_all()
 

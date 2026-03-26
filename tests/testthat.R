@@ -3,7 +3,7 @@
 library(devtools)
 #devtools::load_all()
 library(testthat)
-library(mrpaw)
+library(mrplew)
 
-test_check("mrpaw")
-#test_file("testthat/test_mrpaw.R")
+test_check("mrplew")
+#test_file("testthat/test_mrplew.R")

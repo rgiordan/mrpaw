@@ -4,13 +4,13 @@
 # Effectively, this tests GetIVSEDerivs and GetRegressionSEDerivs with
 # both grouped and ungrouped standard errors.
 
-library(mrpaw)
+library(mrplew)
 library(testthat)
 library(tidyverse)
 library(brms)
 library(rlang)
 
-context("mrpaw")
+context("mrplew")
 
 
 
@@ -21,10 +21,10 @@ test_that("mcmc_runs", {
   for (method in c("ols", "logit", "ols_response_name", "logit_response_name")) {
     print(sprintf("Testing MCMC for method %s", method))
     if (method %in% c("ols", "ols_response_name")) {
-      MrPawFunction <- GetOLSMCMCWeights
+      mrplewFunction <- GetOLSMCMCWeights
       model_type <- "ols"
     } else if (method %in% c("logit", "logit_response_name")) {
-      MrPawFunction <- GetLogitMCMCWeights
+      mrplewFunction <- GetLogitMCMCWeights
       model_type <- "logit"
     } else {
       expect_true(FALSE, sprintf("mcmc_runs: Unknown method %s", method))
@@ -39,7 +39,7 @@ test_that("mcmc_runs", {
     agg_list <- AggregateSimulationData(sim_data, y_col)
 
     # Test that this runs and produces weights of the correct length.
-    mcmc_mrp <- MrPawFunction(
+    mcmc_mrp <- mrplewFunction(
       post, 
       sim_data$survey_df, 
       agg_list$pop_agg_df, 

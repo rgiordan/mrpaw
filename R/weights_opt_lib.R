@@ -18,7 +18,7 @@ CheckColumnNames <- function(x_ols, x_pop) {
 }
 
 
-#' Get MrPaw weights for the OLS estimator.
+#' Get mrplew weights for the OLS estimator.
 #' @param lm_fit The output of `lm`
 #' @param survey_df The survey dataframe
 #' @param pop_df The population dataframe
@@ -55,7 +55,7 @@ GetOLSWeights <- function(lm_fit, survey_df, pop_df, pop_w=NULL) {
 
 # TODO: combine this and the above function with a class checker?
 
-#' Get MrPaw weights for the logistic estimator.
+#' Get mrplew weights for the logistic estimator.
 #' @param logit_fit The output of `glm(..., survey_df, family=binomial(link="logit"))`
 #' @param survey_df The survey dataframe
 #' @param pop_df The population dataframe
