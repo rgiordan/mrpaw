@@ -2,7 +2,7 @@
 % Please edit documentation in R/weights_mcmc_lib.R
 \name{GetLogitMCMCWeights}
 \alias{GetLogitMCMCWeights}
-\title{Get mrplew weights for the logistic MCMC estimator.}
+\title{Get MrPaw weights for the logistic MCMC estimator.}
 \usage{
 GetLogitMCMCWeights(
   logit_post,
@@ -34,5 +34,5 @@ Draws from the MrP estimate, and the weight vector
 whose n-th entry is d E\link{MrP | X, Y} / d y_n.
 }
 \description{
-Get mrplew weights for the logistic MCMC estimator.
+Get MrPaw weights for the logistic MCMC estimator.
 }

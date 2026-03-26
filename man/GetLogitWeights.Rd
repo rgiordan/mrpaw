@@ -2,7 +2,7 @@
 % Please edit documentation in R/weights_opt_lib.R
 \name{GetLogitWeights}
 \alias{GetLogitWeights}
-\title{Get mrplew weights for the logistic estimator.}
+\title{Get MrPaw weights for the logistic estimator.}
 \usage{
 GetLogitWeights(logit_fit, survey_df, pop_df, pop_w = NULL)
 }
@@ -18,5 +18,5 @@ The MrP Logistic estimate for sanity checking, and the weight vector
 whose n-th entry is d MrP / d y_n.
 }
 \description{
-Get mrplew weights for the logistic estimator.
+Get MrPaw weights for the logistic estimator.
 }

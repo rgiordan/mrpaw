@@ -1,5 +1,5 @@
-Package: mrplew
-Title: Mister P local equivalent weights
+Package: mrpaw
+Title: Mister P approximate weights
 Version: 0.0.0.1
 Authors@R:
     person(given = "Ryan",

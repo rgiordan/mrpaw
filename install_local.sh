@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PKG_NAME="mrplew"
+PKG_NAME="mrpaw"
 R -e '
 library(devtools); 
 devtools::document("."); 

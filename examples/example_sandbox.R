@@ -2,7 +2,7 @@ library(tidyverse)
 library(lme4)
 library(brms)
 library(tidybayes)
-library(mrplew)
+library(mrpaw)
 library(gridExtra)
 
 AEqBLine <- function() {
